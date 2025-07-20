@@ -1,4 +1,4 @@
-import { redis } from '@/lib/redis';
+import { storage } from '@/lib/storage';
 
 export function isValidIcon(str: string) {
   if (str.length > 10) {
@@ -33,20 +33,20 @@ type SubdomainData = {
 
 export async function getSubdomainData(subdomain: string) {
   const sanitizedSubdomain = subdomain.toLowerCase().replace(/[^a-z0-9-]/g, '');
-  const data = await redis.get<SubdomainData>(
+  const data = await storage.get<SubdomainData>(
     `subdomain:${sanitizedSubdomain}`
   );
   return data;
 }
 
 export async function getAllSubdomains() {
-  const keys = await redis.keys('subdomain:*');
+  const keys = await storage.keys('subdomain:*');
 
   if (!keys.length) {
     return [];
   }
 
-  const values = await redis.mget<SubdomainData[]>(...keys);
+  const values = await storage.mget<SubdomainData>(...keys);
 
   return keys.map((key, index) => {
     const subdomain = key.replace('subdomain:', '');
